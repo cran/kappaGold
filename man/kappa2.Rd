@@ -7,22 +7,26 @@
 kappa2(ratings, robust = FALSE, ratingScale = NULL)
 }
 \arguments{
-\item{ratings}{matrix (dimension nx2), containing the ratings as subjects by raters}
+\item{ratings}{matrix (dimension nx2), containing the ratings as subjects by
+raters}
 
-\item{robust}{flag. Use robust estimate for random chance of agreement by Brennan-Prediger?}
+\item{robust}{flag. Use robust estimate for random chance of agreement by
+Brennan-Prediger?}
 
 \item{ratingScale}{Possible levels for the rating. Or \code{NULL}.}
 }
 \value{
-list containing Cohen's kappa agreement measure (value) or \code{NULL} if no valid subjects
+list containing Cohen's kappa agreement measure (value) or \code{NULL} if
+no valid subjects
 }
 \description{
-The data of ratings must be stored in a two column object,
-each rater is a columns and the subjects are in the rows.
+Cohen's kappa is the classical agreement measure when two raters provide
+ratings for subjects on a nominal scale.
 }
 \details{
-Every rating category is used and the levels are sorted.
-Weighting is currently not implemented.
+The data of ratings must be stored in a two column object, each rater is a
+column and the subjects are in the rows. Every rating category is used and
+the levels are sorted. Weighting of categories is currently not implemented.
 }
 \examples{
 # 2 raters have assessed 4 subjects into categories "A", "B" or "C"

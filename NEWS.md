@@ -1,4 +1,10 @@
-# kappaGold (development version)
+
+# kappaGold 0.4.0
+* new function `kappa_test_corr` add test for difference in kappa in correlated groups (same subjects) through bootstrap
+* modify API:
+    * rename entries to `se` (instead of `SE`)
+    * `kappam_gold` has parameter `refIdx=` to specify the column of gold standard
+    * `kappam_vanbelle` works with single matrix of ratings (`ratings=`) and `refIdx=` allows to specify one of the groups of raters
 
 # kappaGold 0.3.2
 * enhance description of package (upon request from CRAN)

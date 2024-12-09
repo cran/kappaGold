@@ -6,20 +6,33 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The R-package `kappaGold` estimates agreement of a group of raters with
-a gold standard. It builds on the idea of Conger that the multi-rater
-kappa due to Light (1971) is actually a mean of *all* pairwise Cohen’s
-kappas. In the situation of a gold standard, we only consider the
-pairwise Cohen’s kappas of each rater with that gold standard.
+The R-package `kappaGold` is about agreement of nominal scale raters.
+You can find various agreement measures (like Fleiss’ kappa) but the
+main focus of this package is on agreement where there is a gold
+standard.
+
+## Gold standard
+
+Sometimes, not all raters have equal status but there is an instance
+considered to speak the ground truth and we might want to estimate the
+agreement of the other raters with this gold standard.
+
+### Single gold standard rater
+
+For a single gold standard rater we build on the idea of Conger that the
+multi-rater kappa due to Light (1971) is actually a mean of *all*
+pairwise Cohen’s kappas. In the situation of a gold standard, we only
+consider the pairwise Cohen’s kappas of each rater with that gold
+standard.
 
 The implementation of this measure of agreement with a gold standard is
-found in the function `kappam_gold`. This function expects a matrix of
-ratings with observations in the row and raters in the columns. The
-rater in the 1<sup>st</sup> column is taken to be the gold standard. The
+found in the function `kappam_gold`. `kappam_gold` expects a matrix of
+ratings with observations in the row and raters in the columns. The gold
+standard rater is by default taken from the 1<sup>st</sup> column. The
 delete-1 jackknife method is used to get an estimate of bias and
 standard error.
 
-## Example
+#### Example
 
 In medicine, staging is the process of assessing the extent to which a
 tumour has grown. Staging affets treatment choice, for instance, if
@@ -84,16 +97,40 @@ error. These quantities are used to get the bias-corrected estimate
 `value` which can be used as point estimate and a 95% confidence
 interval.
 
+### Multiple gold standard raters
+
+The situation is more complicated when there are multiple gold standard
+rater. Often this is necessary when the rating is difficult, maybe
+because the rating scale is not well defined and the only gold standard
+is the consensus of a group a experienced raters. For this situation,
+the package `kappaGold` has an implementation of an agreement
+coefficient proposed by Vanbelle, S. and Albert, A. Agreement between
+Two Independent Groups of Raters. Psychometrika 74, 477–491 (2009)
+<https://doi.org/10.1007/s11336-009-9116-1>.
+
+Note that this method applies for any two groups of raters, i.e., it
+does not need the notion of gold standard here.
+
+## Inference on kappa
+
+Besides estimating agreement, we might need to compare the agreement
+between two groups. In `KappaGold`, you can find the methods for two
+cases:
+
+- independent groups (consisting of different subjects being rated): see
+  `kappa_test()`
+- correlated groups (consisting of subjects that are (partially) shared
+  between groups): see `kappa_test_corr()`
+
 ## Installation
 
-Package `kappaGold` was recently released on CRAN. For installation,
-simply issue `install.packages("kappaGold")` in your R-session.
-
-The development of the R-package `kappaGold` is going on at
-[Gitlab](https://gitlab.com/imb-dev/kappa_gold).
-
-With the help of the `remotes`-package you can install the development
-version of package `kappaGold` via:
+Package `kappaGold` was initially released to CRAN in September 2024
+(v0.3.2). To install the current version, simply issue
+`install.packages("kappaGold")` in your R-session. The development of
+the R-package `kappaGold` is going on at
+[Gitlab](https://gitlab.com/imb-dev/kappa_gold). With the help of the
+`remotes`-package you can install the development version of package
+`kappaGold` via:
 
 ``` r
 remotes::install_gitlab("imb-dev/kappa_gold@develop")

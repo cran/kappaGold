@@ -4,10 +4,20 @@
 \alias{kappam_gold}
 \title{Agreement of a group of nominal-scale raters with a gold standard}
 \usage{
-kappam_gold(ratings, robust = FALSE, ratingScale = NULL, conf.level = 0.95)
+kappam_gold(
+  ratings,
+  refIdx = 1,
+  robust = FALSE,
+  ratingScale = NULL,
+  conf.level = 0.95
+)
 }
 \arguments{
-\item{ratings}{matrix subjects by raters}
+\item{ratings}{matrix. subjects by raters}
+
+\item{refIdx}{numeric. index of reference gold-standard raters. Currently,
+only a single gold-standard rater is supported. By default, it is the 1st
+rater.}
 
 \item{robust}{flag. Use robust estimate for random chance of agreement by
 Brennan-Prediger?}
@@ -23,14 +33,15 @@ not counting the reference rater
 }
 \description{
 First, Cohen's kappa is calculated between each rater against the gold
-standard which is taken from the 1st column. The average of these kappas is
-returned as 'kappam_gold0'. The variant setting (\verb{robust=}) is forwarded to
-Cohen's kappa. A bias-corrected version 'kappam_gold' and a corresponding
-confidence interval are provided as well via the jackknife method.
+standard which is taken from the 1st column by default. The average of these
+kappas is returned as 'kappam_gold0'. The variant setting (\verb{robust=}) is
+forwarded to Cohen's kappa. A bias-corrected version 'kappam_gold' and a
+corresponding confidence interval are provided as well via the jackknife
+method.
 }
 \examples{
 # matrix with subjects in rows and raters in columns.
-# 1st column is taken as goldstandard
+# 1st column is taken as gold-standard
 m <- matrix(c("O", "G", "O",
               "G", "G", "R",
               "R", "R", "R",

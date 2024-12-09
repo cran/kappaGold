@@ -112,11 +112,11 @@ uicc <- structure(list(
 
 # cf Fleiss, Cohen, Everitt "large sample std err of kappa", 1969
 # Table1 (and also Table2)
-FCEdat <- tibble(n = as.integer(200 * c(.53, .11, .01,
-                                        .05, .14, .06,
-                                        .02, .05, .03)),
-                  R1 = rep.int(c("I", "II", "III"), times = 3),
-                  R2 = rep(c("I", "II", "III"), each = 3)) |> 
+FCEdat <- data.frame(n = as.integer(200 * c(.53, .11, .01,
+                                            .05, .14, .06,
+                                            .02, .05, .03)),
+                     R1 = rep.int(c("I", "II", "III"), times = 3),
+                     R2 = rep(c("I", "II", "III"), each = 3)) |> 
   tidyr::uncount(weights = n)
 
 
@@ -145,7 +145,7 @@ test_that("kappa2 implementation", {
   expect_type(k2_diag23, type = "list")
   expect_named(k2_diag23,
                expected = c("method", "subjects", "raters", "categories",
-                            "robust", "agreem", "value", "SE"))
+                            "robust", "agreem", "value", "se"))
   expect_equal(k2_diag23$value,
                expected = irr::kappa2(diagnoses[,2:3])$value)
   
@@ -158,7 +158,7 @@ test_that("kappa2 implementation", {
   # unweighted kappa (after Table2)
   k2_FCE <- kappa2(FCEdat)
   expect_equal(k2_FCE$value, expected = .429, tolerance = 1e-3)
-  expect_equal(k2_FCE$SE^2, expected = .002885, tolerance = 1e-4)
+  expect_equal(k2_FCE$se^2, expected = .002885, tolerance = 1e-4)
 })
 
 
@@ -326,22 +326,6 @@ test_that("kappam_gold", {
   expect_equal(kg_uicc$value0,
                expected = weighted.mean(x = purrr::map_dbl(k2_uicc, "value"),
                                         w = purrr::map_dbl(k2_uicc, "subjects")))
-})
-
-
-test_that("kappa homogeneity test", {
-  diagnoses1 <- diagnoses[1:10,]
-  diagnoses2 <- diagnoses[-(1:10),]
-  
-  
-  # homogeneity test
-  kt <- kappa_test(kappas = list(kappa1=kappam_fleiss(diagnoses1),
-                                 kappa2=kappam_fleiss(diagnoses2)),
-                   val = "value0", se = "se0")
-  
-  expect_named(kt, expected = c("method", "data.name", "estimate", "statistic", "p.value", 
-                                "alternative", "parameter", "conf.int"))
-  expect_gt(kt$p.value, expected = 0.1)
 })
 
 

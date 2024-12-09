@@ -1,12 +1,13 @@
 TOL <- 1.5e-8
 
 #' Cohen's kappa for nominal data
-#' 
-#' The data of ratings must be stored in a two column object,
-#' each rater is a columns and the subjects are in the rows.
-#' 
-#' Every rating category is used and the levels are sorted.
-#' Weighting is currently not implemented.
+#'
+#' Cohen's kappa is the classical agreement measure when two raters provide
+#' ratings for subjects on a nominal scale.
+#'
+#' The data of ratings must be stored in a two column object, each rater is a
+#' column and the subjects are in the rows. Every rating category is used and
+#' the levels are sorted. Weighting of categories is currently not implemented.
 #' 
 #' @examples
 #' # 2 raters have assessed 4 subjects into categories "A", "B" or "C"
@@ -21,11 +22,14 @@ TOL <- 1.5e-8
 #' 
 #' # robust variant ---------
 #' kappa2(ratings = m, robust = TRUE)
-#' 
-#' @param ratings matrix (dimension nx2), containing the ratings as subjects by raters
-#' @param robust flag. Use robust estimate for random chance of agreement by Brennan-Prediger?
+#'
+#' @param ratings matrix (dimension nx2), containing the ratings as subjects by
+#'   raters
+#' @param robust flag. Use robust estimate for random chance of agreement by
+#'   Brennan-Prediger?
 #' @param ratingScale Possible levels for the rating. Or `NULL`.
-#' @returns list containing Cohen's kappa agreement measure (value) or `NULL` if no valid subjects
+#' @returns list containing Cohen's kappa agreement measure (value) or `NULL` if
+#'   no valid subjects
 #' @seealso [irr::kappa2()]
 #' @export
 kappa2 <- function (ratings, robust = FALSE, ratingScale = NULL) {
@@ -100,8 +104,8 @@ kappa2 <- function (ratings, robust = FALSE, ratingScale = NULL) {
   for (i in seq_along(ratingScale)) {
     for (j in seq_along(ratingScale)) {
       dsTerm <- dsTerm + ptab0[i,j] * (pCS[[i]] + pRS[[j]])^2
-    }#rof
-  }#rof
+    }#rof j
+  }#rof i
   
   varK2 <- 1/(nSj*(1-chanceP)^4) * (
     crossprod(diag(rtab)/nSj, ((1-chanceP) - (pCS + pRS) * (1-agreeP))^2)[1L] +
@@ -112,9 +116,10 @@ kappa2 <- function (ratings, robust = FALSE, ratingScale = NULL) {
     method = "Cohen's Kappa for two Raters",
     subjects = nSj, raters = 2, categories = nCat,
     robust = robust,
-    agreem = agreeP, value = k2,
+    agreem = agreeP,
+    value = k2,
     #XXX currently, SE only implemented for standard Cohen's Kappa
-    SE = if (!robust && is.finite(varK2) && varK2 >= 0) sqrt(varK2) else NA_real_
+    se = if (!robust && is.finite(varK2) && varK2 >= 0) sqrt(varK2) else NA_real_
   )
 }
 
@@ -367,21 +372,25 @@ kappam_fleiss <- function (ratings, variant = c("fleiss", "conger", "robust", "u
 #' Agreement of a group of nominal-scale raters with a gold standard
 #'
 #' First, Cohen's kappa is calculated between each rater against the gold
-#' standard which is taken from the 1st column. The average of these kappas is
-#' returned as 'kappam_gold0'. The variant setting (`robust=`) is forwarded to
-#' Cohen's kappa. A bias-corrected version 'kappam_gold' and a corresponding
-#' confidence interval are provided as well via the jackknife method.
+#' standard which is taken from the 1st column by default. The average of these
+#' kappas is returned as 'kappam_gold0'. The variant setting (`robust=`) is
+#' forwarded to Cohen's kappa. A bias-corrected version 'kappam_gold' and a
+#' corresponding confidence interval are provided as well via the jackknife
+#' method.
 #'
 #' @examples
 #' # matrix with subjects in rows and raters in columns.
-#' # 1st column is taken as goldstandard
+#' # 1st column is taken as gold-standard
 #' m <- matrix(c("O", "G", "O",
 #'               "G", "G", "R",
 #'               "R", "R", "R",
 #'               "G", "G", "O"), ncol = 3, byrow = TRUE)
 #' kappam_gold(m)
 #'
-#' @param ratings matrix subjects by raters
+#' @param ratings matrix. subjects by raters
+#' @param refIdx numeric. index of reference gold-standard raters. Currently,
+#'   only a single gold-standard rater is supported. By default, it is the 1st
+#'   rater.
 #' @param robust flag. Use robust estimate for random chance of agreement by
 #'   Brennan-Prediger?
 #' @param ratingScale Possible levels for the rating. Or `NULL`.
@@ -390,8 +399,14 @@ kappam_fleiss <- function (ratings, variant = c("fleiss", "conger", "robust", "u
 #'   confidence interval. Entry `raters` refers to the number of tested raters,
 #'   not counting the reference rater
 #' @export
-kappam_gold <- function(ratings, robust = FALSE, ratingScale = NULL, conf.level = .95) {
+kappam_gold <- function(ratings, refIdx = 1, robust = FALSE, ratingScale = NULL,
+                        conf.level = .95) {
   ratings <- as.matrix(ratings)
+  stopifnot(is.numeric(refIdx), length(refIdx) >= 1,
+            min(refIdx) >= 1, max(refIdx) <= NCOL(ratings))
+  # for the time being, only a single gold-standard rater
+  #XXX check consequences of more than one gold-standard rater
+  stopifnot(length(refIdx) == 1)
   
   # handle ratingScale first, before dropping incomplete observations
   if (is.null(ratingScale)) {
@@ -414,7 +429,7 @@ kappam_gold <- function(ratings, robust = FALSE, ratingScale = NULL, conf.level 
   }
   
   # gold standard
-  subjGoldIdx <- which(!is.na(ratings[,1L]))
+  subjGoldIdx <- which(!is.na(ratings[,refIdx]))
   if (!length(subjGoldIdx)) {
     stop("No subject with gold standard rating!", call. = FALSE)
   }
@@ -434,8 +449,8 @@ kappam_gold <- function(ratings, robust = FALSE, ratingScale = NULL, conf.level 
   # @param what character. Which quantity from kappa2-list to work with? Default "value" is Cohen's kappa.
   kappam_gold0 <- function(idx, what = "value") {
     # Cohen's kappa for all pairwise ratings
-    k2L <- purrr::map(.x = 2L:nRaters,
-                      .f = ~ kappa2(ratings[idx, c(1L, .x), drop = FALSE],
+    k2L <- purrr::map(.x = seq_len(nRaters)[-refIdx],
+                      .f = ~ kappa2(ratings[idx, c(refIdx, .x), drop = FALSE],
                                     robust = robust, ratingScale = ratingScale))
     # drop invalid cases (no valid subjects)
     k2L <- purrr::compact(k2L)
@@ -457,7 +472,6 @@ kappam_gold <- function(ratings, robust = FALSE, ratingScale = NULL, conf.level 
   # standard error
   se_j <- kgold_j$se_j
   
-  
   # 95% CI for bias-corrected estimate
   # stats::qt(1 - (1-conf.level)/2, df = max(1, nSubj-1)) * se
   ci <- value + c(-1, 1) * stats::qnorm(1 - (1-conf.level)/2) * se_j
@@ -472,73 +486,6 @@ kappam_gold <- function(ratings, robust = FALSE, ratingScale = NULL, conf.level 
     ci.lo = ci[[1]], ci.hi = ci[[2]], ci.width = diff(ci)
   )
 }
-
-#' Significance test for homogeneity of kappa coefficients
-#'
-#' When groups of different subjects are rated on a nominal scale. Assuming
-#' independence of subjects and their ratings between groups a chi-squared test
-#' for equality of kappa between these groups is performed. The test requires
-#' estimates of kappa and its standard error per group.
-#'
-#' A common overall kappa coefficient across groups is estimated. The test
-#' statistic assesses the weighted squared deviance of the individual kappas
-#' from the overall kappa estimate. The weights depend on the provided standard
-#' errors.
-#'
-#' @examples
-#' # script concordance test on 34 clinical situations,
-#' # rated by 39 students and 11 experts
-#' kappa_stud <- kappam_fleiss(SC_test[, 1:39])
-#' kappa_expert <- kappam_fleiss(SC_test[, 40:50])
-#'
-#' # compare student and expert agreement
-#' kappa_test(kappas = list(kappa_stud, kappa_expert))
-#'
-#'
-#' @param kappas list of kappas from different groups. It uses the kappa
-#'   estimate and its standard error.
-#' @param val character. Name of field to extract kappa coefficient estimate.
-#' @param se character. Name of field to extract standard error of kappa.
-#' @param conf.level numeric. confidence level of confidence interval for
-#'   overall kappa
-#' @returns list containing the test results, including the entries `statistic`
-#'   and `p.value` (class `htest`)
-#' @references Joseph L. Fleiss, Statistical Methods for Rates and Proportions,
-#'   3rd ed., 2003, section 18.1
-#' @export
-kappa_test <- function(kappas, val = "value0", se = "se0", conf.level = 0.95) {
-  # check inputs
-  isOK <- TRUE
-  stopifnot(is.list(kappas), length(kappas) >= 2, nzchar(val), nzchar(se))
-  purrr::iwalk(kappas, function(k, i) {
-    if (!is.list(k) || !all(c(val, se) %in% names(k))) {
-      isOK <- FALSE
-      warning("Kappa provided as ",i, " is not a list or lacks requested entries!",
-              call. = FALSE)
-    }#fi
-  })
-  stopifnot(isOK)
-  
-  k <- purrr::map_dbl(kappas, val)
-  w <- purrr::map_dbl(kappas, se)^-2  # inverse variance weighting
-  kappa_ov <- c(`overall kappa` = stats::weighted.mean(x = k, w = w))
-  
-  chisq_df <- c(df = length(kappas)-1)
-  
-  teststat <- c(`X^2`=sum(w * (k - kappa_ov)^2))
-  pval <- stats::pchisq(q = teststat, df = chisq_df, lower.tail = FALSE)
-  ci_ov <- kappa_ov + c(-1, 1) * stats::qnorm(p=1-(1-conf.level)/2) * sum(w)^-.5
-  attr(ci_ov, which = "conf.level") <- conf.level
-  
-  structure(list(method = "Test for Equality of Kappa in different groups",
-                 data.name = paste(deparse1(substitute(kappas)), "(containing", length(kappas), "kappa values)"),
-                 estimate = kappa_ov,
-                 statistic = teststat, p.value = pval, 
-                 alternative = "two.sided", parameter = chisq_df,
-                 conf.int = ci_ov),
-            class = "htest")
-}
-
 
 #' Simulate rating data and calculate agreement with gold standard
 #' 
@@ -646,7 +593,9 @@ simulKappa <- function(nRater, cats, nSubj, probs, mcSim = 10, simOnly=FALSE) {
                                   ...,
                                   .rows = nSubjTotal))
   
-  if (isTRUE(simOnly)) return(simData)
+  if (isTRUE(simOnly)) {
+    return(simData)
+  }
   
   resL <- future.apply::future_lapply(X = simData, FUN = kappam_gold)
   

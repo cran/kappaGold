@@ -5,16 +5,11 @@
 #' group.
 #'
 #' Data need to be stored with raters in columns.
-#'
-#' @examples
-#' # compare rater1-rater2 vs rater3-rater6 from diagnoses-data
-#' # (there is no systematic difference between both groups
-#' #+as the raters are randomly selected per subject)
-#' kappam_vanbelle(diagnoses[,1:2], diagnoses[,3:6])
 #' 
 #' 
-#' @param ratingsGr1 matrix of subjects x raters for 1st group of raters
-#' @param ratingsGr2 matrix of subjects x raters for 2nd group of raters
+#' @param ratings matrix of subjects x raters for both groups of raters
+#' @param refIdx numeric. indices of raters that constitute the reference group.
+#'   Can also be all negative to define rater group by exclusion.
 #' @param ratingScale character vector of the levels for the rating. Or `NULL`.
 #' @param weights optional weighting schemes: `"unweighted"`,
 #'   `"linear"`,`"quadratic"`
@@ -23,24 +18,29 @@
 #' @references Vanbelle, S., Albert, A. Agreement between Two Independent Groups
 #'   of Raters. Psychometrika 74, 477–491 (2009).
 #'   \doi{10.1007/s11336-009-9116-1}
+#' @examples
+#' # compare student ratings with ratings of 11 experts
+#' kappam_vanbelle(SC_test, refIdx = 40:50)
+#' 
 #' @export
-kappam_vanbelle <- function(ratingsGr1, ratingsGr2, ratingScale = NULL,
+kappam_vanbelle <- function(ratings, refIdx, ratingScale = NULL,
                           weights = c("unweighted", "linear", "quadratic"),
                           conf.level=.95) {
   
+  stopifnot(is.numeric(refIdx), length(refIdx) >= 1,
+            min(abs(refIdx)) >= 1, max(abs(refIdx)) <= NCOL(ratings))
   weights <- match.arg(weights)
   stopifnot(is.numeric(conf.level), length(conf.level) == 1L,
             conf.level > 0, conf.level < 1)
   
-  ratingsGr1 <- stats::na.omit(as.matrix(ratingsGr1))
-  ratingsGr2 <- stats::na.omit(as.matrix(ratingsGr2))
-  stopifnot(is.matrix(ratingsGr1), is.matrix(ratingsGr2),
-            !is.null(ratingsGr1), !is.null(ratingsGr2),
-            NROW(ratingsGr1) == NROW(ratingsGr2), NROW(ratingsGr1) >= 1)
+  ratings <- stats::na.omit(as.matrix(ratings))
+  stopifnot(!is.null(ratings), is.matrix(ratings), NROW(ratings) >= 1)
+  
+  ratingsGr1 <- ratings[, refIdx, drop = FALSE]
+  ratingsGr2 <- ratings[, -refIdx, drop = FALSE]
   nRat1 <- NCOL(ratingsGr1)
   nRat2 <- NCOL(ratingsGr2)
   
-  ratings <- cbind(ratingsGr1, ratingsGr2)
   nSubj <- NROW(ratings)
   
   if (is.null(ratingScale)) {
@@ -81,8 +81,8 @@ kappam_vanbelle <- function(ratingsGr1, ratingsGr2, ratingScale = NULL,
   kappam_vanbelle0 <- function(idx = seq_len(nSubj)) {
     
     nSubj0 <- length(idx)
-    nij1 <- nij1[idx,]
-    nij2 <- nij2[idx,]
+    nij1 <- nij1[idx,, drop = FALSE]
+    nij2 <- nij2[idx,, drop = FALSE]
     
     pij1 <- nij1 / nRat1
     pij2 <- nij2 / nRat2

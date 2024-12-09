@@ -73,6 +73,33 @@
 "stagingData"
 
 
+#' Depression screening
+#' 
+#' Fifty general hospital patients, admitted to the Monash Medical Centre in
+#' Melbourne, were randomly drawn from a larger sample described by Clarke et
+#' al. (1993). Agreement between two different screening tests and a diagnosis
+#' of depression was compared. Definition of depression included DSM-III-R Major
+#' Depression, Dysthymia, Adjustment Disorderwith Depressed Mood, and Depression
+#' NOS. Depression was determined empirically using the Cutoff (McKenzie &
+#' Clarke, 1992) program.
+#' The screening tests consisted of
+#' 
+#' 1. the Beck Depression Inventory (BDI) (Beck et al., 1961) and
+#' 2. the General Health Questionnaire (GHQ) (Goldberg & Williams, 1988)
+#' 
+#' @format
+#' A matrix with 50 observations and 3 variables:
+#' \describe{
+#'   \item{depression}{diagnoses as determined by the Cutoff program}
+#'   \item{BDI}{Beck Depression Inventory}
+#'   \item{GHQ}{General Health Questionnaire}
+#' }
+#' @references McKenzie, D. P. et al., Comparing Correlated Kappas by Resampling: 
+#'   Is One Level of Agreement Significantly Different from Another?
+#'   J. psychiat. Res, Vol. 30, 1996. \doi{10.1016/S0022-3956(96)00033-7}
+"depression"
+
+
 #' Psychiatric diagnoses
 #'
 #' N = 30 patients were given one of k = 5 diagnoses by some n = 6
@@ -88,7 +115,6 @@
 #' psychiatrists from the pool of 43 were unsystematically selected to diagnose
 #' a subject. Fleiss randomly selected six diagnoses per subject to bring the
 #' number of assignments per patient down to a constant of six.
-#'
 #'
 #'
 #' As there is not a fixed set of six raters the ratings from the same column
@@ -115,3 +141,17 @@
 #' @seealso This dataset is also available as `diagnoses` in the irr-package on
 #'   CRAN.
 "diagnoses"
+
+
+#' Three reliability studies for some binary rating
+#'
+#' The data are reported in a textbook from Fleiss, probably it is fictitious.
+#'
+#' @format
+#' A list that contains three matrices. Each matrix contains the result of a
+#' study involving two raters. It is a binary rating scale ("+" and "-").
+#'
+#' @references Fleiss, J. L., Levin, B., & Paik, M. C. Statistical
+#'   Methods for Rates and Proportions, 3rd edition, 2003, ISBN 0-471-52629-0
+#' @source Chapter 18, Problems 18.3
+"agreem_binary"

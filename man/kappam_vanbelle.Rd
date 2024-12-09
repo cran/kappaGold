@@ -5,17 +5,18 @@
 \title{Agreement between two groups of raters}
 \usage{
 kappam_vanbelle(
-  ratingsGr1,
-  ratingsGr2,
+  ratings,
+  refIdx,
   ratingScale = NULL,
   weights = c("unweighted", "linear", "quadratic"),
   conf.level = 0.95
 )
 }
 \arguments{
-\item{ratingsGr1}{matrix of subjects x raters for 1st group of raters}
+\item{ratings}{matrix of subjects x raters for both groups of raters}
 
-\item{ratingsGr2}{matrix of subjects x raters for 2nd group of raters}
+\item{refIdx}{numeric. indices of raters that constitute the reference group.
+Can also be all negative to define rater group by exclusion.}
 
 \item{ratingScale}{character vector of the levels for the rating. Or \code{NULL}.}
 
@@ -36,11 +37,8 @@ group.
 Data need to be stored with raters in columns.
 }
 \examples{
-# compare rater1-rater2 vs rater3-rater6 from diagnoses-data
-# (there is no systematic difference between both groups
-#+as the raters are randomly selected per subject)
-kappam_vanbelle(diagnoses[,1:2], diagnoses[,3:6])
-
+# compare student ratings with ratings of 11 experts
+kappam_vanbelle(SC_test, refIdx = 40:50)
 
 }
 \references{
